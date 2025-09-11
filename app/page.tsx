@@ -1,103 +1,83 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Section from "@/components/Section";
+import ProgressDots from "@/components/ProgressDots";
+import ScrollerControls from "@/components/ScrollerControls";
+import About from "@/sections/About";
+import Portfolio from "@/sections/Portfolio";
+import Services from "@/sections/Services";
+import Book from "@/sections/Book";
+
+const SECTION_IDS = ["about", "portfolio", "services", "book"] as const;
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const isMobile = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches,
+    []
+  );
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const handler = () => {
+      const children = Array.from(el.children) as HTMLElement[];
+      const offsets = children.map((c) => Math.abs(c.getBoundingClientRect().left));
+      const idx = offsets.indexOf(Math.min(...offsets));
+      setActiveIndex(idx);
+    };
+    el.addEventListener("scroll", handler, { passive: true } as any);
+    handler();
+    return () => el.removeEventListener("scroll", handler as any);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        snapTo(activeIndex + 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        snapTo(activeIndex - 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeIndex]);
+
+  const snapTo = useCallback((index: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const children = Array.from(el.children) as HTMLElement[];
+    const clamped = Math.max(0, Math.min(children.length - 1, index));
+    children[clamped].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    const id = SECTION_IDS[clamped];
+    if (id) history.replaceState(null, "", `/#${id}`);
+  }, []);
+
+  const onDotClick = (idx: number) => snapTo(idx);
+
+  return (
+    <main className="relative">
+      <div
+        ref={scrollerRef}
+        className="snap-x snap-mandatory overflow-x-auto overflow-y-hidden h-[100dvh] flex flex-row scroll-smooth [scrollbar-width:thin] md:[scrollbar-width:auto] md:scroll-ps-0"
+        role="region"
+        aria-label="Portfolio sections"
+      >
+        <Section id="about" backgroundImageUrl="/about-bg.jpg" contentClassName="w-full h-full"><About onCta={() => snapTo(1)} /></Section>
+        <Section id="portfolio" backgroundClass="bg-[radial-gradient(60%_50%_at_70%_30%,rgba(255,46,166,0.08),transparent),linear-gradient(180deg,#fff,#fafafa)]"><Portfolio /></Section>
+        <Section id="services" backgroundClass="bg-[radial-gradient(70%_60%_at_30%_70%,rgba(255,46,166,0.08),transparent),linear-gradient(180deg,#fff,#f6f7f9)]"><Services /></Section>
+        <Section id="book" backgroundClass="bg-[radial-gradient(65%_55%_at_80%_20%,rgba(255,46,166,0.10),transparent),linear-gradient(180deg,#fff,#f2f3f5)]"><Book /></Section>
+      </div>
+      <ProgressDots count={SECTION_IDS.length} activeIndex={activeIndex} onSelect={onDotClick} />
+      <ScrollerControls activeIndex={activeIndex} total={SECTION_IDS.length} onPrev={() => snapTo(activeIndex - 1)} onNext={() => snapTo(activeIndex + 1)} hideOnLast />
+    </main>
   );
 }
