@@ -28,9 +28,19 @@ export default function Home() {
       const idx = offsets.indexOf(Math.min(...offsets));
       setActiveIndex(idx);
     };
-    el.addEventListener("scroll", handler, { passive: true } as any);
+    el.addEventListener("scroll", handler, { passive: true } as AddEventListenerOptions);
     handler();
-    return () => el.removeEventListener("scroll", handler as any);
+    return () => el.removeEventListener("scroll", handler);
+  }, []);
+
+  const snapTo = useCallback((index: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const children = Array.from(el.children) as HTMLElement[];
+    const clamped = Math.max(0, Math.min(children.length - 1, index));
+    children[clamped].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    const id = SECTION_IDS[clamped];
+    if (id) history.replaceState(null, "", `/#${id}`);
   }, []);
 
   useEffect(() => {
@@ -49,17 +59,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [activeIndex]);
-
-  const snapTo = useCallback((index: number) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const children = Array.from(el.children) as HTMLElement[];
-    const clamped = Math.max(0, Math.min(children.length - 1, index));
-    children[clamped].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-    const id = SECTION_IDS[clamped];
-    if (id) history.replaceState(null, "", `/#${id}`);
-  }, []);
+  }, [activeIndex, snapTo]);
 
   const onDotClick = (idx: number) => snapTo(idx);
 

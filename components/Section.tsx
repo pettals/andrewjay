@@ -16,7 +16,7 @@ export default function Section({ id, children, backgroundClass, backgroundImage
   return (
     <section
       id={id}
-      className="relative min-w-[100vw] snap-start h-[100dvh] flex items-start justify-center p-6 md:p-16 pt-28 md:pt-32"
+      className="relative min-w-[100vw] snap-start h-[100dvh] flex items-start justify-center p-6 md:p-16 pt-28 md:pt-32 overflow-y-auto"
       aria-labelledby={`${id}-heading`}
     >
       {backgroundImageUrl ? (

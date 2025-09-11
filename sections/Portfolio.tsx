@@ -58,17 +58,17 @@ export default function Portfolio() {
   const [active, setActive] = useState<CategoryKey | null>(null);
 
   return (
-    <div>
-      <h2 id="portfolio-heading" className="text-3xl md:text-5xl font-semibold tracking-tight">Portfolio</h2>
-      <p className="mt-3 text-muted max-w-2xl">Explore my work.</p>
+    <div className="px-4 sm:px-6 md:px-0">
+      <h2 id="portfolio-heading" className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-tight">Portfolio</h2>
+      <p className="mt-2 sm:mt-3 text-sm sm:text-base text-muted max-w-2xl">Explore my work.</p>
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+      <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {(Object.keys(CATEGORY_CARDS) as CategoryKey[]).map((key) => {
           const c = CATEGORY_CARDS[key];
           return (
             <motion.div
               key={key}
-              className={`group relative overflow-hidden rounded-2xl border border-black/10 bg-white text-left p-5 md:p-6 ${c.gradient}`}
+              className={`group relative overflow-hidden rounded-2xl border border-black/10 bg-white text-left p-4 sm:p-5 md:p-6 ${c.gradient}`}
               initial={{ y: 10, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true, amount: 0.4 }}
@@ -76,13 +76,13 @@ export default function Portfolio() {
             >
               <div className="relative z-[1] h-full flex flex-col">
                 <div>
-                  <div className="text-sm text-muted">{c.subtitle}</div>
-                  <div className="mt-1 text-xl md:text-2xl font-semibold">{c.title}</div>
-                  <div className="mt-3 text-sm text-muted line-clamp-3">{c.description}</div>
+                  <div className="text-xs sm:text-sm text-muted">{c.subtitle}</div>
+                  <div className="mt-1 text-lg sm:text-xl md:text-2xl font-semibold">{c.title}</div>
+                  <div className="mt-2 sm:mt-3 text-sm text-muted line-clamp-3">{c.description}</div>
                 </div>
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-4 sm:pt-6">
                   <button 
-                    className="bg-pink-500 text-white hover:bg-pink-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="w-full sm:w-auto bg-pink-500 text-white hover:bg-pink-600 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
                     onClick={() => setActive(key)}
                     aria-label={`Open ${c.title}`}
                   >
